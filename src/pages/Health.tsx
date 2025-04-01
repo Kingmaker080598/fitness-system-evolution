@@ -5,7 +5,7 @@ import { MobileLayout } from '@/components/mobile-layout';
 import { HealthMetricCard } from '@/components/health/health-metric-card';
 import { HealthChart } from '@/components/health/health-chart';
 import { Button } from '@/components/ui/button';
-import { Plus, PlusCircle, Scale, Heart, Activity, TrendingUp } from 'lucide-react';
+import { Plus, PlusCircle, Scale, Heart, Activity, TrendingUp, Droplets } from 'lucide-react';
 
 // Mock weight data for chart
 const weightData = [
@@ -27,6 +27,17 @@ const bpData = [
   { date: 'Sep 20', value: 121 },
   { date: 'Sep 25', value: 117 },
   { date: 'Sep 30', value: 116 },
+];
+
+// Mock blood sugar data for chart
+const bloodSugarData = [
+  { date: 'Sep 1', value: 95 },
+  { date: 'Sep 5', value: 92 },
+  { date: 'Sep 10', value: 98 },
+  { date: 'Sep 15', value: 94 },
+  { date: 'Sep 20', value: 96 },
+  { date: 'Sep 25', value: 93 },
+  { date: 'Sep 30', value: 90 },
 ];
 
 const Health = () => {
@@ -83,6 +94,15 @@ const Health = () => {
             icon={<Heart size={20} />}
             change={{ value: 3, positive: false }}
           />
+          
+          <HealthMetricCard
+            title="Blood Sugar"
+            value={90}
+            unit="mg/dL"
+            date="Sep 30, 2023"
+            icon={<Droplets size={20} />}
+            change={{ value: 3, positive: false }}
+          />
         </div>
         
         <div className="mt-6 space-y-4">
@@ -100,6 +120,14 @@ const Health = () => {
             unit="mmHg"
             dataKey="value"
             color="#9B30FF"
+          />
+          
+          <HealthChart
+            title="Blood Sugar"
+            data={bloodSugarData}
+            unit="mg/dL"
+            dataKey="value"
+            color="#00CED1"
           />
         </div>
         

@@ -132,6 +132,32 @@ const Workouts = () => {
   }
 
   const currentWorkouts = workouts[selectedDay as keyof typeof workouts] || [];
+  
+  // Array of days in order
+  const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  
+  // Get current day index
+  const currentDayIndex = daysOrder.indexOf(selectedDay);
+  
+  // Handle navigation to previous day
+  const handlePrevious = () => {
+    if (currentDayIndex > 0) {
+      setSelectedDay(daysOrder[currentDayIndex - 1]);
+    } else {
+      // Wrap around to the last day if at the beginning
+      setSelectedDay(daysOrder[daysOrder.length - 1]);
+    }
+  };
+  
+  // Handle navigation to next day
+  const handleNext = () => {
+    if (currentDayIndex < daysOrder.length - 1) {
+      setSelectedDay(daysOrder[currentDayIndex + 1]);
+    } else {
+      // Wrap around to the first day if at the end
+      setSelectedDay(daysOrder[0]);
+    }
+  };
 
   return (
     <MobileLayout currentTab="workouts">
@@ -169,6 +195,7 @@ const Workouts = () => {
             variant="outline" 
             size="sm" 
             className="border-solo-blue/50 text-solo-blue"
+            onClick={handlePrevious}
           >
             <ArrowLeft size={16} className="mr-1" /> Previous
           </Button>
@@ -176,6 +203,7 @@ const Workouts = () => {
             variant="outline" 
             size="sm" 
             className="border-solo-blue/50 text-solo-blue"
+            onClick={handleNext}
           >
             Next <ArrowRight size={16} className="ml-1" />
           </Button>
