@@ -1,73 +1,142 @@
-# Welcome to your Lovable project
 
-## Project info
+# Fitness System Evolution Mobile App
 
-**URL**: https://lovable.dev/projects/efffcf51-019f-4dbd-b704-dfe36845d14c
+A comprehensive fitness and health tracking mobile application that works on both iOS and Android devices.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- User authentication and profile management
+- Workout tracking and planning
+- Health metrics monitoring
+- Bluetooth device connectivity
+- Daily activity tracking
+- Social sharing capabilities
 
-**Use Lovable**
+## Technology Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/efffcf51-019f-4dbd-b704-dfe36845d14c) and start prompting.
+- React + TypeScript
+- Tailwind CSS for styling
+- Capacitor for native mobile functionality
+- Recharts for data visualization
+- Web Bluetooth API for device connectivity
 
-Changes made via Lovable will be committed automatically to this repo.
+## Development Setup
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js (v16+)
+- npm or yarn
+- For iOS builds: macOS with Xcode installed
+- For Android builds: Android Studio with SDK tools
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd fitness-system-evolution
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. Install dependencies:
+```bash
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. Build the web application:
+```bash
+npm run build
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+4. Sync the web application with Capacitor:
+```bash
+npx cap sync
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Running the Application
+
+#### Web Development (for testing)
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+#### iOS
+```bash
+npx cap open ios
+```
+Then use Xcode to run the application on a simulator or physical device.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#### Android
+```bash
+npx cap open android
+```
+Then use Android Studio to run the application on an emulator or physical device.
 
-**Use GitHub Codespaces**
+### Adding Platforms
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+If you need to add iOS or Android platforms:
 
-## What technologies are used for this project?
+```bash
+npx cap add ios
+npx cap add android
+```
 
-This project is built with .
+### Updating after Code Changes
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+After making changes to the web application:
 
-## How can I deploy this project?
+1. Build the application:
+```bash
+npm run build
+```
 
-Simply open [Lovable](https://lovable.dev/projects/efffcf51-019f-4dbd-b704-dfe36845d14c) and click on Share -> Publish.
+2. Sync changes with Capacitor:
+```bash
+npx cap sync
+```
 
-## Can I connect a custom domain to my Lovable project?
+## Deploying to App Stores
 
-Yes it is!
+### iOS App Store
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. In Xcode, select "Generic iOS Device" as the build target
+2. Go to Product > Archive
+3. Once archiving is complete, click "Distribute App"
+4. Follow the prompts to upload to the App Store
+5. Complete the app submission in App Store Connect
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Google Play Store
+
+1. In Android Studio, go to Build > Generate Signed Bundle/APK
+2. Select "Android App Bundle" or "APK" (App Bundle is recommended)
+3. Create or select a keystore for signing
+4. Follow the prompts to generate the release build
+5. Upload the generated .aab or .apk file to the Google Play Console
+6. Complete the app submission process
+
+## Updating Native Configurations
+
+To modify Capacitor configuration, edit the `capacitor.config.ts` file and then run:
+
+```bash
+npx cap sync
+```
+
+## Adding Native Plugins
+
+To add Capacitor plugins for native functionality:
+
+```bash
+npm install @capacitor/plugin-name
+npx cap sync
+```
+
+## Troubleshooting
+
+- If you encounter build errors, check that all dependencies are properly installed
+- Ensure Xcode and Android Studio are up to date
+- For iOS device testing, verify that your developer certificate is valid
+- For Android device testing, ensure USB debugging is enabled
+
+## License
+
+[Your License Information]
