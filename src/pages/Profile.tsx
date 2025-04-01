@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
 import { ProfileHeader } from '@/components/profile/profile-header';
@@ -16,16 +16,60 @@ import {
   Zap
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import { getUserProfile, getUserStats } from '@/services/profile-service';
 
 const Profile = () => {
   const { toast } = useToast();
-  const [user, setUser] = useState({
-    name: 'John Hunter',
-    email: 'john.hunter@example.com',
+  const { user, signOut, isLoading } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
+  const [stats, setStats] = useState({
+    workouts: 0,
+    streak: 0,
+    hours: 0,
+    days: 0,
+    level: 1
   });
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        try {
+          // Fetch profile data
+          const profileResult = await getUserProfile(user.id);
+          if (profileResult.success && profileResult.data) {
+            setProfile(profileResult.data);
+          } else {
+            setProfile({
+              name: user.user_metadata?.name || 'User',
+              email: user.email
+            });
+          }
+          
+          // Fetch user stats
+          const statsResult = await getUserStats(user.id);
+          if (statsResult.success && statsResult.data) {
+            setStats(statsResult.data);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load profile data",
+            variant: "destructive"
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchUserData();
+  }, [user, toast]);
   
   // Check if user is logged in
-  if (localStorage.getItem('isLoggedIn') !== 'true') {
+  if (!isLoading && !user) {
     return <Navigate to="/auth" replace />;
   }
 
@@ -36,39 +80,34 @@ const Profile = () => {
     });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    toast({
-      title: "Logged out successfully",
-      description: "See you next time!",
-    });
-    window.location.href = '/auth';
+  const handleLogout = async () => {
+    await signOut();
   };
 
-  const stats = [
+  const userStats = [
     {
       label: 'Workouts',
-      value: 32,
+      value: stats.workouts,
       icon: <Flame size={20} />
     },
     {
       label: 'Streak',
-      value: 7,
+      value: stats.streak,
       icon: <Zap size={20} />
     },
     {
       label: 'Hours',
-      value: 24,
+      value: stats.hours,
       icon: <Clock size={20} />
     },
     {
       label: 'Level',
-      value: 5,
+      value: stats.level,
       icon: <Award size={20} />
     },
     {
       label: 'Days',
-      value: 45,
+      value: stats.days,
       icon: <Calendar size={20} />
     },
     {
@@ -78,12 +117,23 @@ const Profile = () => {
     }
   ];
 
+  if (isLoading || loading) {
+    return (
+      <MobileLayout currentTab="profile">
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="animate-spin w-6 h-6 border-2 border-solo-blue border-t-transparent rounded-full"></div>
+          <span className="ml-2">Loading profile...</span>
+        </div>
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout currentTab="profile">
       <div className="space-y-6">
         <ProfileHeader
-          name={user.name}
-          email={user.email}
+          name={profile?.name || 'User'}
+          email={profile?.email || user?.email || ''}
           onEditClick={handleEditProfile}
         />
         
@@ -91,7 +141,7 @@ const Profile = () => {
         
         <div>
           <h2 className="text-lg font-semibold mb-4">Your Stats</h2>
-          <StatsSection stats={stats} />
+          <StatsSection stats={userStats} />
         </div>
         
         <div className="glass-card rounded-lg p-4 mt-6">

@@ -4,30 +4,26 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false);
-      // For demo, just log in with any credentials
-      localStorage.setItem('isLoggedIn', 'true');
-      toast({
-        title: "Logged in successfully!",
-        description: "Welcome back to Solo Fitness.",
-      });
+    const result = await signIn(email, password);
+    
+    setIsLoading(false);
+    
+    if (result.success) {
       navigate('/dashboard');
-    }, 1500);
+    }
   };
 
   return (
