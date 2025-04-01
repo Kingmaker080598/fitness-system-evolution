@@ -1,10 +1,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { Session, User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 type AuthContextType = {
-  user: any | null;
+  user: User | null;
+  session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
@@ -14,36 +17,58 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        // Check if user is already logged in
-        const { data } = await supabase.auth.getSession();
-        setUser(data.session?.user || null);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
         
-        // Set up auth state listener
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            setUser(session?.user || null);
-          }
-        );
-        
-        return () => {
-          authListener.subscription.unsubscribe();
-        };
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
-        setIsLoading(false);
+        // Store login state in localStorage for non-auth pages to check
+        if (session) {
+          localStorage.setItem('isLoggedIn', 'true');
+        } else {
+          localStorage.removeItem('isLoggedIn');
+        }
+
+        if (event === 'SIGNED_IN') {
+          toast({
+            title: "Signed in successfully",
+            description: "Welcome to Solo Fitness!",
+          });
+          navigate('/dashboard');
+        } else if (event === 'SIGNED_OUT') {
+          toast({
+            title: "Signed out",
+            description: "You have been signed out successfully.",
+          });
+          navigate('/auth');
+        }
       }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session) {
+        localStorage.setItem('isLoggedIn', 'true');
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
     };
-    
-    initializeAuth();
-  }, []);
+  }, [toast, navigate]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -54,12 +79,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) throw error;
-      
-      setUser(data.user);
-      toast({
-        title: "Logged in successfully!",
-        description: "Welcome back to Solo Fitness.",
-      });
       
       return { success: true };
     } catch (error: any) {
@@ -82,20 +101,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         options: {
-          data: { name },
+          data: { full_name: name },
         },
       });
       
       if (error) throw error;
-      
-      // Create profile record
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{ id: data.user.id, name, email }]);
-          
-        if (profileError) throw profileError;
-      }
       
       toast({
         title: "Account created successfully!",
@@ -124,10 +134,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       
       setUser(null);
-      toast({
-        title: "Logged out successfully",
-        description: "See you next time!",
-      });
+      setSession(null);
+      localStorage.removeItem('isLoggedIn');
     } catch (error: any) {
       toast({
         title: "Error signing out",
@@ -140,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

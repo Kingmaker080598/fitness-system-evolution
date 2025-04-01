@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,11 +14,16 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { useAuth } from '@/context/AuthContext';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   // Form state using react-hook-form
   const form = useForm({
@@ -36,33 +40,39 @@ export const RegisterForm = () => {
 
   const handleSubmit = async (values) => {
     setIsLoading(true);
+    setError(null);
     
-    // Store the user data in localStorage for demo purposes
-    const userData = {
-      ...values,
-      // Convert string values to numbers where appropriate
-      age: parseInt(values.age),
-      weight: parseFloat(values.weight),
-      height: parseFloat(values.height),
-    };
+    // Sign up with Supabase
+    const result = await signUp(values.email, values.password, values.name);
     
-    // Simulate account creation
-    setTimeout(() => {
-      localStorage.setItem('userData', JSON.stringify(userData));
-      localStorage.setItem('isLoggedIn', 'true');
-      
-      toast({
-        title: "Account created!",
-        description: "Welcome to Solo Fitness. Your journey begins now.",
-      });
-      navigate('/dashboard');
-      setIsLoading(false);
-    }, 1500);
+    if (result.success) {
+      // Save additional health data
+      try {
+        // We'll handle this in a separate function once the user is authenticated
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to Solo Fitness. Your journey begins now.",
+        });
+      } catch (err) {
+        console.error("Failed to save health data", err);
+      }
+    } else {
+      setError(result.error || "Registration failed");
+    }
+    
+    setIsLoading(false);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
         <FormField
           control={form.control}
           name="name"
@@ -112,6 +122,7 @@ export const RegisterForm = () => {
                   type="password" 
                   placeholder="Create a password" 
                   required 
+                  minLength={6}
                   className="bg-muted border-solo-blue/30 focus:border-solo-blue"
                 />
               </FormControl>

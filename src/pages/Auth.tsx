@@ -1,16 +1,18 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { LoginForm } from '@/components/auth/login-form';
 import { RegisterForm } from '@/components/auth/register-form';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/context/AuthContext';
 
 const Auth = () => {
   const [currentTab, setCurrentTab] = useState('login');
+  const { user, isLoading } = useAuth();
   
   // If user is already logged in, redirect to dashboard
-  if (localStorage.getItem('isLoggedIn') === 'true') {
+  if (!isLoading && user) {
     return <Navigate to="/dashboard" replace />;
   }
 
