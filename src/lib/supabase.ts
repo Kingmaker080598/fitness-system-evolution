@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Use the real Supabase URL and anon key from the auto-generated client

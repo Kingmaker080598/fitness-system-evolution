@@ -105,6 +105,12 @@ export const AddHealthMetricForm: React.FC<AddHealthMetricFormProps> = ({
         });
         onSuccess();
         onClose();
+        // Reset form after successful submission
+        setFormData({
+          metricType: '',
+          value: '',
+          unit: '',
+        });
       } else {
         toast({
           title: "Error",
