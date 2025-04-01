@@ -4,6 +4,8 @@ import { Navigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
 import { HealthMetricCard } from '@/components/health/health-metric-card';
 import { HealthChart } from '@/components/health/health-chart';
+import { ShareHealthData } from '@/components/social/share-health-data';
+import { ImportHealthData } from '@/components/social/import-health-data';
 import { Button } from '@/components/ui/button';
 import { Plus, PlusCircle, Scale, Heart, Activity, TrendingUp, Droplets } from 'lucide-react';
 
@@ -57,6 +59,11 @@ const Health = () => {
           <Button className="bg-solo-purple hover:bg-solo-purple/80">
             <Plus size={16} className="mr-1" /> Add Entry
           </Button>
+        </div>
+        
+        <div className="flex gap-2 mb-4">
+          <ShareHealthData />
+          <ImportHealthData />
         </div>
         
         <div className="grid grid-cols-2 gap-3">

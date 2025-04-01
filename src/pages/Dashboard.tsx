@@ -24,6 +24,23 @@ const Dashboard = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  // Store username in localStorage for sharing feature
+  useEffect(() => {
+    if (!localStorage.getItem('userName')) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          localStorage.setItem('userName', userData.name || 'User');
+        } catch (e) {
+          localStorage.setItem('userName', 'User');
+        }
+      } else {
+        localStorage.setItem('userName', 'User');
+      }
+    }
+  }, []);
+
   return (
     <MobileLayout currentTab="dashboard">
       <div className="space-y-6">
@@ -99,7 +116,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <h2 className="font-semibold text-foreground mb-3">Today's Activities</h2>
         <DailySummary />
         
         <div className="glass-card rounded-lg p-4 flex items-center gap-3">

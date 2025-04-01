@@ -26,18 +26,19 @@ export const DailyActivityCard: React.FC<DailyActivityCardProps> = ({
   const [lastResetDate, setLastResetDate] = useState<string>(
     localStorage.getItem(`${title}-lastReset`) || new Date().toDateString()
   );
-  
-  const progress = Math.min((currentValue / target) * 100, 100);
+  const [customTarget, setCustomTarget] = useState(target);
   
   // Load saved values on mount
   useEffect(() => {
     const savedValue = localStorage.getItem(`${title}-value`);
     const savedCompleted = localStorage.getItem(`${title}-completed`);
     const savedLastResetDate = localStorage.getItem(`${title}-lastReset`);
+    const savedTarget = localStorage.getItem(`${title}-target`);
     
     if (savedValue) setCurrentValue(Number(savedValue));
     if (savedCompleted) setIsCompleted(savedCompleted === 'true');
     if (savedLastResetDate) setLastResetDate(savedLastResetDate);
+    if (savedTarget) setCustomTarget(Number(savedTarget));
     
     // Check if we need to reset (new day)
     const today = new Date().toDateString();
@@ -54,7 +55,7 @@ export const DailyActivityCard: React.FC<DailyActivityCardProps> = ({
         description: `Your ${title.toLowerCase()} progress has been reset for the new day.`,
       });
     }
-  }, [title, lastResetDate, toast]);
+  }, [title, lastResetDate, toast, target]);
   
   // Save values when they change
   useEffect(() => {
@@ -66,7 +67,7 @@ export const DailyActivityCard: React.FC<DailyActivityCardProps> = ({
     let increment = 1;
     // For kilometers, increment by 0.5
     if (unit === "km") increment = 0.5;
-    const newValue = Math.min(currentValue + increment, target);
+    const newValue = Math.min(currentValue + increment, customTarget);
     setCurrentValue(newValue);
   };
   
@@ -80,13 +81,15 @@ export const DailyActivityCard: React.FC<DailyActivityCardProps> = ({
   
   const handleComplete = () => {
     setIsCompleted(true);
-    setCurrentValue(target);
+    setCurrentValue(customTarget);
     
     toast({
       title: "Activity Completed!",
       description: `Congratulations on completing your ${title.toLowerCase()} goal!`,
     });
   };
+
+  const progress = Math.min((currentValue / customTarget) * 100, 100);
 
   return (
     <div className="glass-card rounded-lg p-4">
@@ -97,7 +100,7 @@ export const DailyActivityCard: React.FC<DailyActivityCardProps> = ({
       
       <div className="flex items-baseline gap-1">
         <span className="text-2xl font-bold neon-text">{currentValue}</span>
-        <span className="text-muted-foreground text-sm">/ {target} {unit}</span>
+        <span className="text-muted-foreground text-sm">/ {customTarget} {unit}</span>
       </div>
       
       <div className="mt-3 progress-bar">
@@ -126,7 +129,7 @@ export const DailyActivityCard: React.FC<DailyActivityCardProps> = ({
             size="sm" 
             className="p-1 h-8 w-8"
             onClick={handleIncrement}
-            disabled={isCompleted || currentValue >= target}
+            disabled={isCompleted || currentValue >= customTarget}
           >
             <Plus size={16} />
           </Button>
