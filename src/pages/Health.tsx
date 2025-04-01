@@ -1,49 +1,120 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
 import { HealthMetricCard } from '@/components/health/health-metric-card';
 import { HealthChart } from '@/components/health/health-chart';
 import { ShareHealthData } from '@/components/social/share-health-data';
 import { ImportHealthData } from '@/components/social/import-health-data';
+import { AddHealthMetricForm } from '@/components/health/add-health-metric-form';
 import { Button } from '@/components/ui/button';
-import { Plus, PlusCircle, Scale, Heart, Activity, TrendingUp, Droplets, Bluetooth } from 'lucide-react';
-
-// Mock weight data for chart
-const weightData = [
-  { date: 'Sep 1', value: 75 },
-  { date: 'Sep 5', value: 74.5 },
-  { date: 'Sep 10', value: 74 },
-  { date: 'Sep 15', value: 73.8 },
-  { date: 'Sep 20', value: 73.2 },
-  { date: 'Sep 25', value: 72.9 },
-  { date: 'Sep 30', value: 72.5 },
-];
-
-// Mock blood pressure data for chart
-const bpData = [
-  { date: 'Sep 1', value: 120 },
-  { date: 'Sep 5', value: 118 },
-  { date: 'Sep 10', value: 122 },
-  { date: 'Sep 15', value: 119 },
-  { date: 'Sep 20', value: 121 },
-  { date: 'Sep 25', value: 117 },
-  { date: 'Sep 30', value: 116 },
-];
-
-// Mock blood sugar data for chart
-const bloodSugarData = [
-  { date: 'Sep 1', value: 95 },
-  { date: 'Sep 5', value: 92 },
-  { date: 'Sep 10', value: 98 },
-  { date: 'Sep 15', value: 94 },
-  { date: 'Sep 20', value: 96 },
-  { date: 'Sep 25', value: 93 },
-  { date: 'Sep 30', value: 90 },
-];
+import { 
+  Plus, 
+  PlusCircle, 
+  Scale, 
+  Heart, 
+  Activity, 
+  TrendingUp, 
+  Droplets, 
+  Bluetooth 
+} from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { getHealthMetrics, getHealthMetricHistory } from '@/services/health-service';
+import { HealthMetric } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 const Health = () => {
+  const { user, isLoading } = useAuth();
+  const { toast } = useToast();
+  const [isAddMetricOpen, setIsAddMetricOpen] = useState(false);
+  const [healthMetrics, setHealthMetrics] = useState<{[key: string]: HealthMetric}>({});
+  const [weightData, setWeightData] = useState<{date: string; value: number}[]>([]);
+  const [bpData, setBpData] = useState<{date: string; value: number}[]>([]);
+  const [bloodSugarData, setBloodSugarData] = useState<{date: string; value: number}[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  // Fetch health metrics on component mount
+  useEffect(() => {
+    if (user) {
+      fetchHealthMetrics();
+    }
+  }, [user]);
+
+  const fetchHealthMetrics = async () => {
+    if (!user) return;
+    
+    setIsDataLoading(true);
+    try {
+      // Get the latest health metrics for each type
+      const response = await getHealthMetrics(user.id);
+      
+      if (response.success) {
+        const latestMetrics: {[key: string]: HealthMetric} = {};
+        
+        // Group by metric type and get the latest one for each type
+        response.data.forEach(metric => {
+          if (!latestMetrics[metric.metric_type] || 
+              new Date(metric.date) > new Date(latestMetrics[metric.metric_type].date)) {
+            latestMetrics[metric.metric_type] = metric;
+          }
+        });
+        
+        setHealthMetrics(latestMetrics);
+        
+        // Fetch history for charts
+        fetchMetricHistory('weight');
+        fetchMetricHistory('blood_pressure');
+        fetchMetricHistory('blood_sugar');
+      }
+    } catch (error) {
+      console.error("Error fetching health metrics:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load health metrics",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
+
+  const fetchMetricHistory = async (metricType: string) => {
+    if (!user) return;
+    
+    try {
+      const response = await getHealthMetricHistory(user.id, metricType);
+      
+      if (response.success) {
+        const chartData = response.data.map(metric => ({
+          date: new Date(metric.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          value: metricType === 'blood_pressure' 
+            ? parseInt(metric.value.split('/')[0]) 
+            : parseFloat(metric.value)
+        }));
+        
+        switch (metricType) {
+          case 'weight':
+            setWeightData(chartData);
+            break;
+          case 'blood_pressure':
+            setBpData(chartData);
+            break;
+          case 'blood_sugar':
+            setBloodSugarData(chartData);
+            break;
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching ${metricType} history:`, error);
+    }
+  };
+
+  const handleAddMetricSuccess = () => {
+    fetchHealthMetrics();
+  };
+
   // Check if user is logged in
-  if (localStorage.getItem('isLoggedIn') !== 'true') {
+  if (!isLoading && !user) {
     return <Navigate to="/auth" replace />;
   }
 
@@ -55,7 +126,10 @@ const Health = () => {
             <h1 className="text-2xl font-bold text-foreground">Health</h1>
             <p className="text-muted-foreground text-sm">Track your health metrics</p>
           </div>
-          <Button className="bg-solo-purple hover:bg-solo-purple/80">
+          <Button 
+            className="bg-solo-purple hover:bg-solo-purple/80"
+            onClick={() => setIsAddMetricOpen(true)}
+          >
             <Plus size={16} className="mr-1" /> Add Entry
           </Button>
         </div>
@@ -77,82 +151,103 @@ const Health = () => {
         <div className="grid grid-cols-2 gap-3">
           <HealthMetricCard
             title="Weight"
-            value={72.5}
+            value={healthMetrics.weight ? parseFloat(healthMetrics.weight.value) : 0}
             unit="kg"
-            date="Sep 30, 2023"
+            date={healthMetrics.weight ? new Date(healthMetrics.weight.date).toLocaleDateString() : ''}
             icon={<Scale size={20} />}
-            change={{ value: 0.4, positive: false }}
+            change={healthMetrics.weight && weightData.length > 1 ? {
+              value: Math.abs(parseFloat(healthMetrics.weight.value) - weightData[weightData.length - 2]?.value || 0),
+              positive: parseFloat(healthMetrics.weight.value) < (weightData[weightData.length - 2]?.value || 0)
+            } : undefined}
           />
           
           <HealthMetricCard
             title="Height"
-            value={178}
+            value={healthMetrics.height ? parseFloat(healthMetrics.height.value) : 0}
             unit="cm"
-            date="Sep 30, 2023"
+            date={healthMetrics.height ? new Date(healthMetrics.height.date).toLocaleDateString() : ''}
             icon={<TrendingUp size={20} />}
           />
           
           <HealthMetricCard
             title="Blood Pressure"
-            value="116/75"
+            value={healthMetrics.blood_pressure ? healthMetrics.blood_pressure.value : "0/0"}
             unit="mmHg"
-            date="Sep 30, 2023"
+            date={healthMetrics.blood_pressure ? new Date(healthMetrics.blood_pressure.date).toLocaleDateString() : ''}
             icon={<Activity size={20} />}
-            change={{ value: 2, positive: false }}
+            change={healthMetrics.blood_pressure && bpData.length > 1 ? {
+              value: Math.abs(parseInt(healthMetrics.blood_pressure.value.split('/')[0]) - (bpData[bpData.length - 2]?.value || 0)),
+              positive: parseInt(healthMetrics.blood_pressure.value.split('/')[0]) < (bpData[bpData.length - 2]?.value || 0)
+            } : undefined}
           />
           
           <HealthMetricCard
             title="Heart Rate"
-            value={68}
+            value={healthMetrics.heart_rate ? parseFloat(healthMetrics.heart_rate.value) : 0}
             unit="bpm"
-            date="Sep 30, 2023"
+            date={healthMetrics.heart_rate ? new Date(healthMetrics.heart_rate.date).toLocaleDateString() : ''}
             icon={<Heart size={20} />}
-            change={{ value: 3, positive: false }}
           />
           
           <HealthMetricCard
             title="Blood Sugar"
-            value={90}
+            value={healthMetrics.blood_sugar ? parseFloat(healthMetrics.blood_sugar.value) : 0}
             unit="mg/dL"
-            date="Sep 30, 2023"
+            date={healthMetrics.blood_sugar ? new Date(healthMetrics.blood_sugar.date).toLocaleDateString() : ''}
             icon={<Droplets size={20} />}
-            change={{ value: 3, positive: false }}
+            change={healthMetrics.blood_sugar && bloodSugarData.length > 1 ? {
+              value: Math.abs(parseFloat(healthMetrics.blood_sugar.value) - (bloodSugarData[bloodSugarData.length - 2]?.value || 0)),
+              positive: parseFloat(healthMetrics.blood_sugar.value) < (bloodSugarData[bloodSugarData.length - 2]?.value || 0)
+            } : undefined}
           />
         </div>
         
         <div className="mt-6 space-y-4">
-          <HealthChart
-            title="Weight Trend"
-            data={weightData}
-            unit="kg"
-            dataKey="value"
-            color="#00A3FF"
-          />
+          {weightData.length > 0 && (
+            <HealthChart
+              title="Weight Trend"
+              data={weightData}
+              unit="kg"
+              dataKey="value"
+              color="#00A3FF"
+            />
+          )}
           
-          <HealthChart
-            title="Blood Pressure (Systolic)"
-            data={bpData}
-            unit="mmHg"
-            dataKey="value"
-            color="#9B30FF"
-          />
+          {bpData.length > 0 && (
+            <HealthChart
+              title="Blood Pressure (Systolic)"
+              data={bpData}
+              unit="mmHg"
+              dataKey="value"
+              color="#9B30FF"
+            />
+          )}
           
-          <HealthChart
-            title="Blood Sugar"
-            data={bloodSugarData}
-            unit="mg/dL"
-            dataKey="value"
-            color="#00CED1"
-          />
+          {bloodSugarData.length > 0 && (
+            <HealthChart
+              title="Blood Sugar"
+              data={bloodSugarData}
+              unit="mg/dL"
+              dataKey="value"
+              color="#00CED1"
+            />
+          )}
         </div>
         
         <Button 
           variant="outline" 
           className="w-full mt-4 border-dashed border-solo-blue/30 text-solo-blue hover:bg-solo-blue/5"
+          onClick={() => setIsAddMetricOpen(true)}
         >
           <PlusCircle size={16} className="mr-2" /> Add New Health Metric
         </Button>
       </div>
+
+      <AddHealthMetricForm 
+        isOpen={isAddMetricOpen}
+        onClose={() => setIsAddMetricOpen(false)}
+        onSuccess={handleAddMetricSuccess}
+      />
     </MobileLayout>
   );
 };
