@@ -1,14 +1,26 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    // Checking if user is already logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    
+    // If not logged in, let the Navigate component handle the redirect
+    if (!isLoggedIn) {
+      console.log('User not logged in, redirecting to auth page');
+    } else {
+      console.log('User already logged in, redirecting to dashboard');
+    }
+  }, []);
+
+  // Check if user is logged in, redirect to dashboard if true, auth if false
+  if (localStorage.getItem('isLoggedIn') === 'true') {
+    return <Navigate to="/dashboard" replace />;
+  } else {
+    return <Navigate to="/auth" replace />;
+  }
 };
 
 export default Index;
