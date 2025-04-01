@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Plus, Minus } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface DailyActivityCardProps {
   title: string;
@@ -19,28 +20,72 @@ export const DailyActivityCard: React.FC<DailyActivityCardProps> = ({
   unit,
   icon,
 }) => {
+  const { toast } = useToast();
   const [currentValue, setCurrentValue] = useState(value);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [lastResetDate, setLastResetDate] = useState<string>(
+    localStorage.getItem(`${title}-lastReset`) || new Date().toDateString()
+  );
   
   const progress = Math.min((currentValue / target) * 100, 100);
+  
+  // Load saved values on mount
+  useEffect(() => {
+    const savedValue = localStorage.getItem(`${title}-value`);
+    const savedCompleted = localStorage.getItem(`${title}-completed`);
+    const savedLastResetDate = localStorage.getItem(`${title}-lastReset`);
+    
+    if (savedValue) setCurrentValue(Number(savedValue));
+    if (savedCompleted) setIsCompleted(savedCompleted === 'true');
+    if (savedLastResetDate) setLastResetDate(savedLastResetDate);
+    
+    // Check if we need to reset (new day)
+    const today = new Date().toDateString();
+    if (lastResetDate !== today) {
+      setCurrentValue(0);
+      setIsCompleted(false);
+      setLastResetDate(today);
+      localStorage.setItem(`${title}-lastReset`, today);
+      localStorage.setItem(`${title}-value`, '0');
+      localStorage.setItem(`${title}-completed`, 'false');
+      
+      toast({
+        title: "Daily Reset",
+        description: `Your ${title.toLowerCase()} progress has been reset for the new day.`,
+      });
+    }
+  }, [title, lastResetDate, toast]);
+  
+  // Save values when they change
+  useEffect(() => {
+    localStorage.setItem(`${title}-value`, currentValue.toString());
+    localStorage.setItem(`${title}-completed`, isCompleted.toString());
+  }, [title, currentValue, isCompleted]);
   
   const handleIncrement = () => {
     let increment = 1;
     // For kilometers, increment by 0.5
     if (unit === "km") increment = 0.5;
-    setCurrentValue(prev => Math.min(prev + increment, target));
+    const newValue = Math.min(currentValue + increment, target);
+    setCurrentValue(newValue);
   };
   
   const handleDecrement = () => {
     let decrement = 1;
     // For kilometers, decrement by 0.5
     if (unit === "km") decrement = 0.5;
-    setCurrentValue(prev => Math.max(prev - decrement, 0));
+    const newValue = Math.max(currentValue - decrement, 0);
+    setCurrentValue(newValue);
   };
   
   const handleComplete = () => {
     setIsCompleted(true);
     setCurrentValue(target);
+    
+    toast({
+      title: "Activity Completed!",
+      description: `Congratulations on completing your ${title.toLowerCase()} goal!`,
+    });
   };
 
   return (
