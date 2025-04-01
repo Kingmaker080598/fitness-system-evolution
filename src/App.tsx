@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Workouts from "./pages/Workouts";
 import Health from "./pages/Health";
 import Profile from "./pages/Profile";
+import DeviceSync from "./pages/DeviceSync";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/workouts" element={<Workouts />} />
             <Route path="/health" element={<Health />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/devices" element={<DeviceSync />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>

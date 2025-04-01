@@ -1,13 +1,12 @@
-
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
 import { HealthMetricCard } from '@/components/health/health-metric-card';
 import { HealthChart } from '@/components/health/health-chart';
 import { ShareHealthData } from '@/components/social/share-health-data';
 import { ImportHealthData } from '@/components/social/import-health-data';
 import { Button } from '@/components/ui/button';
-import { Plus, PlusCircle, Scale, Heart, Activity, TrendingUp, Droplets } from 'lucide-react';
+import { Plus, PlusCircle, Scale, Heart, Activity, TrendingUp, Droplets, Bluetooth } from 'lucide-react';
 
 // Mock weight data for chart
 const weightData = [
@@ -65,6 +64,15 @@ const Health = () => {
           <ShareHealthData />
           <ImportHealthData />
         </div>
+        
+        <Button 
+          variant="outline" 
+          className="w-full mb-4 border-solo-blue/30 text-solo-blue hover:bg-solo-blue/5"
+          as={Link}
+          to="/devices"
+        >
+          <Bluetooth size={16} className="mr-2" /> Connect Health Devices
+        </Button>
         
         <div className="grid grid-cols-2 gap-3">
           <HealthMetricCard
