@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Activity, Watch, Smartphone, ToggleLeft, Info, Bluetooth, CheckCircle2 } from 'lucide-react';
+import { Activity, Watch, Smartphone, Info, Bluetooth, CheckCircle2, AlertCircle } from 'lucide-react';
 import { 
   Dialog,
   DialogContent,
@@ -20,8 +19,17 @@ const DeviceSync = () => {
   const { toast } = useToast();
   const [connectedDevices, setConnectedDevices] = useState<string[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isBluetoothSupported, setIsBluetoothSupported] = useState(false);
   
-  // Check if user is logged in
+  useEffect(() => {
+    if (navigator.bluetooth) {
+      setIsBluetoothSupported(true);
+    } else {
+      console.log("Web Bluetooth API is not supported in this browser.");
+      setIsBluetoothSupported(false);
+    }
+  }, []);
+  
   if (localStorage.getItem('isLoggedIn') !== 'true') {
     return <Navigate to="/auth" replace />;
   }
@@ -31,7 +39,7 @@ const DeviceSync = () => {
     
     try {
       if (!navigator.bluetooth) {
-        throw new Error("Bluetooth not supported");
+        throw new Error("Bluetooth not supported in this browser");
       }
       
       toast({
@@ -52,7 +60,7 @@ const DeviceSync = () => {
         
         setConnectedDevices(prev => [...prev, device.name || 'Unknown device']);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Bluetooth connection error:', error);
       
       toast({
@@ -107,6 +115,13 @@ const DeviceSync = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {!isBluetoothSupported && (
+              <div className="flex items-center gap-2 p-3 mb-4 bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-md">
+                <AlertCircle size={18} />
+                <p className="text-sm">Web Bluetooth is not supported in this browser. Please try Chrome, Edge, or Opera.</p>
+              </div>
+            )}
+            
             {connectedDevices.length > 0 ? (
               <div className="space-y-2">
                 {connectedDevices.map((device, index) => (
@@ -127,7 +142,7 @@ const DeviceSync = () => {
             <Button 
               className="w-full bg-solo-blue hover:bg-solo-blue/80" 
               onClick={handleConnectBluetooth}
-              disabled={isConnecting}
+              disabled={isConnecting || !isBluetoothSupported}
             >
               {isConnecting ? 'Connecting...' : 'Connect Bluetooth Device'}
             </Button>

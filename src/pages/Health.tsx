@@ -65,14 +65,14 @@ const Health = () => {
           <ImportHealthData />
         </div>
         
-        <Button 
-          variant="outline" 
-          className="w-full mb-4 border-solo-blue/30 text-solo-blue hover:bg-solo-blue/5"
-          as={Link}
-          to="/devices"
-        >
-          <Bluetooth size={16} className="mr-2" /> Connect Health Devices
-        </Button>
+        <Link to="/devices">
+          <Button 
+            variant="outline" 
+            className="w-full mb-4 border-solo-blue/30 text-solo-blue hover:bg-solo-blue/5"
+          >
+            <Bluetooth size={16} className="mr-2" /> Connect Health Devices
+          </Button>
+        </Link>
         
         <div className="grid grid-cols-2 gap-3">
           <HealthMetricCard
