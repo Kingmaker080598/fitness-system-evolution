@@ -15,7 +15,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-solo-dark px-4">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-solo-dark px-4 py-8">
       <div className="w-full max-w-md mx-auto mb-8 text-center">
         <div className="mb-6">
           <h1 className="text-3xl font-bold neon-text">SOLO FITNESS</h1>
@@ -33,7 +33,7 @@ const Auth = () => {
             <TabsContent value="login">
               <LoginForm />
             </TabsContent>
-            <TabsContent value="register">
+            <TabsContent value="register" className="max-h-[70vh] overflow-y-auto pb-4">
               <RegisterForm />
             </TabsContent>
           </Tabs>
