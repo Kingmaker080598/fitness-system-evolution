@@ -3,13 +3,38 @@ import React, { useEffect } from 'react';
 import { DailyActivityCard } from './daily-activity-card';
 import { CustomGoalsForm } from './custom-goals-form';
 import { CircleDashed, Droplets, MoveHorizontal } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { Motion } from '@capacitor/motion';
 
 export const DailySummary = () => {
-  // Make sure we update the current date each day
+  const { toast } = useToast();
+  
+  // Request motion permission when component mounts
   useEffect(() => {
+    const requestMotionPermission = async () => {
+      try {
+        // Try to add a listener to request permission
+        await Motion.addListener('accel', () => {});
+        // Remove it immediately
+        await Motion.removeAllListeners();
+        
+        console.log('Motion permission granted');
+      } catch (error) {
+        console.error('Motion permission denied or not available:', error);
+        toast({
+          title: "Fitness Tracking",
+          description: "For step counting, please allow motion sensor access when prompted.",
+        });
+      }
+    };
+    
+    // Make sure we update the current date each day
     const today = new Date().toDateString();
     localStorage.setItem('currentDate', today);
-  }, []);
+    
+    // Request motion permission
+    requestMotionPermission();
+  }, [toast]);
 
   return (
     <div>

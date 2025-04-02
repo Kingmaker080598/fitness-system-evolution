@@ -7,7 +7,6 @@ import { ShareHealthData } from '@/components/social/share-health-data';
 import { ImportHealthData } from '@/components/social/import-health-data';
 import { AddHealthMetricCards } from '@/components/health/add-health-metric-cards';
 import { OfflineIndicator } from '@/components/health/offline-indicator';
-import { StepCounter } from '@/components/health/step-counter';
 import { Button } from '@/components/ui/button';
 import { 
   Plus, 
@@ -138,8 +137,6 @@ const Health = () => {
             </Button>
           </div>
         </div>
-        
-        <StepCounter />
         
         <div className="flex flex-wrap gap-2 mb-4">
           <ShareHealthData />
