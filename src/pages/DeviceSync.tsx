@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Activity, Watch, Smartphone, Info, Bluetooth, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Activity, Watch, Smartphone, Info, Bluetooth, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { 
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
 
 const DeviceSync = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [connectedDevices, setConnectedDevices] = useState<string[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isBluetoothSupported, setIsBluetoothSupported] = useState(false);
@@ -94,13 +96,27 @@ const DeviceSync = () => {
     });
   };
 
+  const handleGoBack = () => {
+    navigate('/health');
+  };
+
   return (
     <MobileLayout currentTab="devices">
       <div className="space-y-6">
         <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Device Sync</h1>
-            <p className="text-muted-foreground text-sm">Connect your health devices</p>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full" 
+              onClick={handleGoBack}
+            >
+              <ArrowLeft size={20} />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Device Sync</h1>
+              <p className="text-muted-foreground text-sm">Connect your health devices</p>
+            </div>
           </div>
           <Activity size={24} className="text-solo-purple" />
         </div>

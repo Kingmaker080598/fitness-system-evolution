@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -33,8 +34,6 @@ export const RegisterForm = () => {
       password: '',
       age: '',
       gender: '',
-      weight: '',
-      height: '',
     }
   });
 
@@ -173,52 +172,6 @@ export const RegisterForm = () => {
                       <Label htmlFor="female">Female</Label>
                     </div>
                   </RadioGroup>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="weight"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weight (kg)</FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field} 
-                    type="number"
-                    step="0.1"
-                    min="20"
-                    max="300"
-                    placeholder="70.5" 
-                    required 
-                    className="bg-muted border-solo-blue/30 focus:border-solo-blue"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="height"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Height (cm)</FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field} 
-                    type="number"
-                    step="0.1"
-                    min="50"
-                    max="250"
-                    placeholder="175" 
-                    required 
-                    className="bg-muted border-solo-blue/30 focus:border-solo-blue"
-                  />
                 </FormControl>
               </FormItem>
             )}

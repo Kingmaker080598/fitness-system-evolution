@@ -16,7 +16,7 @@ import {
   Settings,
   Zap
 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getUserProfile, getUserStats } from '@/services/profile-service';
 
@@ -42,8 +42,10 @@ const Profile = () => {
           if (profileResult.success && profileResult.data) {
             setProfile(profileResult.data);
           } else {
+            // Get name from user metadata if available
+            const userName = user.user_metadata?.name || user.user_metadata?.full_name || 'User';
             setProfile({
-              full_name: user.user_metadata?.name || 'User',
+              full_name: userName,
               email: user.email,
               avatar_url: null
             });
@@ -142,7 +144,7 @@ const Profile = () => {
     <MobileLayout currentTab="profile">
       <div className="space-y-6">
         <ProfileHeader
-          name={profile?.full_name || 'User'}
+          name={profile?.full_name || user?.user_metadata?.name || 'User'}
           email={profile?.email || user?.email || ''}
           avatar={profile?.avatar_url}
           onEditClick={handleEditProfile}
