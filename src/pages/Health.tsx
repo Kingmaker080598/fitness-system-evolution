@@ -6,7 +6,7 @@ import { HealthMetricCard } from '@/components/health/health-metric-card';
 import { HealthChart } from '@/components/health/health-chart';
 import { ShareHealthData } from '@/components/social/share-health-data';
 import { ImportHealthData } from '@/components/social/import-health-data';
-import { AddHealthMetricForm } from '@/components/health/add-health-metric-form';
+import { AddHealthMetricCards } from '@/components/health/add-health-metric-cards';
 import { Button } from '@/components/ui/button';
 import { 
   Plus, 
@@ -243,7 +243,7 @@ const Health = () => {
         </Button>
       </div>
 
-      <AddHealthMetricForm 
+      <AddHealthMetricCards 
         isOpen={isAddMetricOpen}
         onClose={() => setIsAddMetricOpen(false)}
         onSuccess={handleAddMetricSuccess}

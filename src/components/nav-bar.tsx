@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart, Dumbbell, Heart, User } from 'lucide-react';
+import { BarChart, Dumbbell, Heart, User, Home } from 'lucide-react';
 
 interface NavBarProps {
   currentTab: string;
@@ -9,6 +9,7 @@ interface NavBarProps {
 
 export const NavBar: React.FC<NavBarProps> = ({ currentTab }) => {
   const tabs = [
+    { name: 'home', icon: Home, label: 'Home', path: '/' },
     { name: 'dashboard', icon: BarChart, label: 'Dashboard', path: '/dashboard' },
     { name: 'workouts', icon: Dumbbell, label: 'Workouts', path: '/workouts' },
     { name: 'health', icon: Heart, label: 'Health', path: '/health' },

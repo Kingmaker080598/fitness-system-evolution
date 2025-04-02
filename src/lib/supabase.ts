@@ -15,10 +15,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 // Types for our database tables
+export type Profile = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  updated_at: string | null;
+}
+
 export type User = {
   id: string;
-  name: string;
   email: string;
+  user_metadata?: {
+    name?: string;
+  };
   created_at?: string;
 }
 

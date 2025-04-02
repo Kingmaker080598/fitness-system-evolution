@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getSharedHealthData } from '@/services/share-service';
 import { 
   Dialog,
   DialogContent,
@@ -29,7 +30,7 @@ export const ImportHealthData = () => {
   const [friendData, setFriendData] = useState<any>(null);
   const [importSuccess, setImportSuccess] = useState(false);
   
-  const handleImportCode = () => {
+  const handleImportCode = async () => {
     if (!shareCode) {
       toast({
         title: "Error",
@@ -40,19 +41,34 @@ export const ImportHealthData = () => {
     }
     
     try {
-      // Decode the share code
-      const decodedData = JSON.parse(atob(shareCode));
-      setFriendData(decodedData);
+      const result = await getSharedHealthData(shareCode);
       
-      toast({
-        title: "Code Imported",
-        description: "Friend's health data imported successfully.",
-      });
-      
-      // In a real app, you would save this to a database
-      // For demo, we'll just keep it in state
-      setImportSuccess(true);
-      
+      if (result.success) {
+        // Process the health metrics into a more user-friendly format
+        const metrics = (result.data.metrics || []).reduce((acc: any, metric: any) => {
+          acc[metric.metric_type] = {
+            value: metric.value,
+            unit: metric.unit,
+            date: new Date(metric.date).toLocaleDateString()
+          };
+          return acc;
+        }, {});
+
+        setFriendData({
+          name: result.data.sender_name || 'Friend',
+          metrics: metrics,
+          timestamp: result.data.created_at,
+        });
+        
+        toast({
+          title: "Code Imported",
+          description: `Successfully imported health data from ${result.data.sender_name || 'Friend'}`,
+        });
+        
+        setImportSuccess(true);
+      } else {
+        throw new Error(result.error);
+      }
     } catch (error) {
       toast({
         title: "Invalid Code",
@@ -113,62 +129,30 @@ export const ImportHealthData = () => {
           </div>
         ) : (
           <div className="py-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">{friendData?.name}'s Health Data</CardTitle>
-                <CardDescription>Shared on {formatDate(friendData?.timestamp)}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Weight:</span>
-                  <span className="font-medium">{friendData?.weight} kg</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Height:</span>
-                  <span className="font-medium">{friendData?.height} cm</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Blood Pressure:</span>
-                  <span className="font-medium">{friendData?.bloodPressure} mmHg</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Heart Rate:</span>
-                  <span className="font-medium">{friendData?.heartRate} bpm</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Blood Sugar:</span>
-                  <span className="font-medium">{friendData?.bloodSugar} mg/dL</span>
-                </div>
-                <div className="pt-2 border-t mt-2">
-                  <p className="font-medium mb-2">Daily Activities</p>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Push-ups:</span>
-                    <span className="font-medium">{friendData?.activities?.pushups} reps</span>
+            {friendData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Health Data from {friendData.name}</CardTitle>
+                  <CardDescription>
+                    Shared on {formatDate(friendData.timestamp)}
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-2">
+                    {Object.entries(friendData.metrics).map(([type, data]: [string, any]) => (
+                      <div key={type} className="flex justify-between items-center p-2 hover:bg-secondary rounded">
+                        <span className="font-medium">{type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}:</span>
+                        <div className="text-right">
+                          <div>{data.value} {data.unit}</div>
+                          <div className="text-xs text-muted-foreground">Last updated: {data.date}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Running/Walking:</span>
-                    <span className="font-medium">{friendData?.activities?.distance} km</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Water Intake:</span>
-                    <span className="font-medium">{friendData?.activities?.water} glasses</span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => {
-                    setImportSuccess(false);
-                    setShareCode('');
-                  }}
-                >
-                  Import Another
-                </Button>
-              </CardFooter>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
         

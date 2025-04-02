@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
 import { Navigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
 import { ProfileHeader } from '@/components/profile/profile-header';
@@ -42,8 +43,9 @@ const Profile = () => {
             setProfile(profileResult.data);
           } else {
             setProfile({
-              name: user.user_metadata?.name || 'User',
-              email: user.email
+              full_name: user.user_metadata?.name || 'User',
+              email: user.email,
+              avatar_url: null
             });
           }
           
@@ -73,10 +75,18 @@ const Profile = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   const handleEditProfile = () => {
-    toast({
-      title: "Edit Profile",
-      description: "This feature will be available in the next update.",
+    setIsEditDialogOpen(true);
+  };
+
+  const handleProfileUpdate = (updatedProfile: any) => {
+    console.log('Updating profile with:', updatedProfile);
+    setProfile(prev => {
+      const newProfile = { ...prev, ...updatedProfile };
+      console.log('New profile state:', newProfile);
+      return newProfile;
     });
   };
 
@@ -132,8 +142,9 @@ const Profile = () => {
     <MobileLayout currentTab="profile">
       <div className="space-y-6">
         <ProfileHeader
-          name={profile?.name || 'User'}
+          name={profile?.full_name || 'User'}
           email={profile?.email || user?.email || ''}
+          avatar={profile?.avatar_url}
           onEditClick={handleEditProfile}
         />
         
@@ -171,6 +182,14 @@ const Profile = () => {
         >
           <LogOut size={16} className="mr-2" /> Log Out
         </Button>
+
+        <EditProfileDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          userId={user?.id || ''}
+          currentProfile={profile}
+          onProfileUpdate={handleProfileUpdate}
+        />
       </div>
     </MobileLayout>
   );

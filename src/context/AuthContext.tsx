@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             title: "Signed in successfully",
             description: "Welcome to Solo Fitness!",
           });
-          navigate('/dashboard');
+          navigate('/');
         } else if (event === 'SIGNED_OUT') {
           toast({
             title: "Signed out",

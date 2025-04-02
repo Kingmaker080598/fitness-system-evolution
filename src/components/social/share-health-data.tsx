@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { createShareableLink, shareViaEmail } from '@/services/share-service';
 import { 
   Dialog,
   DialogContent,
@@ -23,35 +25,46 @@ import {
 
 export const ShareHealthData = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [copied, setCopied] = useState(false);
+  const [shareCode, setShareCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Generate a shareable code based on user's health data
-  const generateShareCode = () => {
-    const userData = {
-      name: localStorage.getItem('userName') || 'Anonymous',
-      weight: localStorage.getItem('Weight-value') || '0',
-      height: localStorage.getItem('Height-value') || '0',
-      bloodPressure: localStorage.getItem('Blood Pressure-value') || '0/0',
-      heartRate: localStorage.getItem('Heart Rate-value') || '0',
-      bloodSugar: localStorage.getItem('Blood Sugar-value') || '0',
-      activities: {
-        pushups: localStorage.getItem('Push-ups-value') || '0',
-        distance: localStorage.getItem('Running/Walking-value') || '0',
-        water: localStorage.getItem('Water Intake-value') || '0',
-      },
-      timestamp: new Date().toISOString(),
-    };
+  // Generate a shareable code when the dialog opens
+  const generateShareCode = async () => {
+    if (!user) return;
     
-    // Create a shareable code by encoding data to base64
-    return btoa(JSON.stringify(userData));
+    setIsLoading(true);
+    try {
+      const result = await createShareableLink(user.id);
+      
+      if (result.success) {
+        setShareCode(result.data.share_code);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to generate share code.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating share code:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  const shareableCode = generateShareCode();
-  
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(shareableCode);
+    if (!shareCode) return;
+    
+    navigator.clipboard.writeText(shareCode);
     setCopied(true);
     
     toast({
@@ -63,7 +76,9 @@ export const ShareHealthData = () => {
     setTimeout(() => setCopied(false), 2000);
   };
   
-  const handleShareViaEmail = () => {
+  const handleShareViaEmail = async () => {
+    if (!user) return;
+    
     if (!email) {
       toast({
         title: "Error",
@@ -73,15 +88,34 @@ export const ShareHealthData = () => {
       return;
     }
     
-    // In a real app, this would send the code via an API
-    // For now, we'll just simulate success
-    toast({
-      title: "Share Successful",
-      description: `Your health data has been shared with ${email}.`,
-    });
-    
-    setEmail('');
-    setOpen(false);
+    setIsLoading(true);
+    try {
+      const result = await shareViaEmail(user.id, email);
+      
+      if (result.success) {
+        toast({
+          title: "Share Successful",
+          description: `Your health data has been shared with ${email}.`,
+        });
+        setEmail('');
+        setOpen(false);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to share via email.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing via email:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
@@ -103,67 +137,60 @@ export const ShareHealthData = () => {
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs defaultValue="code">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="code">Share Code</TabsTrigger>
-            <TabsTrigger value="email">Email</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="code" className="space-y-4 py-4">
-            <div className="grid gap-2">
-              <Label>Your Shareable Code</Label>
-              <div className="relative">
-                <Input
-                  value={shareableCode}
-                  readOnly
-                  className="pr-10 font-mono text-xs"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2"
-                  onClick={handleCopyCode}
-                >
-                  {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
-                </Button>
+        <div className="space-y-4 py-4">
+          <div className="grid gap-4">
+            <div>
+              <Button 
+                onClick={generateShareCode} 
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? (
+                  <>
+                    <Users className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Users className="mr-2 h-4 w-4" />
+                    Generate Share Code
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {shareCode && (
+              <div className="grid gap-2">
+                <Label>Your Shareable Code</Label>
+                <div className="relative">
+                  <Input
+                    value={shareCode}
+                    readOnly
+                    className="pr-10 font-mono"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2"
+                    onClick={handleCopyCode}
+                  >
+                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Share this code with someone who has the app installed. They can import your data
+                  by pasting this code. The code will expire in 48 hours.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Share this code with someone who has the app installed. They can import your data
-                by pasting this code.
-              </p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="email" className="space-y-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="friend@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                Enter the email of the person you want to share with. They must have the app installed
-                to view your health data.
-              </p>
-            </div>
-            
-            <Button 
-              onClick={handleShareViaEmail}
-              className="w-full"
-            >
-              Share via Email
-            </Button>
-          </TabsContent>
-        </Tabs>
+            )}
+          </div>
+        </div>
         
         <DialogFooter className="sm:justify-start">
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={() => setOpen(false)}
           >
             Close

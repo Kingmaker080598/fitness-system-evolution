@@ -1,5 +1,5 @@
 
-import { supabase, User } from '@/lib/supabase';
+import { supabase, Profile } from '@/lib/supabase';
 
 export const getUserProfile = async (userId: string) => {
   try {
@@ -10,24 +10,93 @@ export const getUserProfile = async (userId: string) => {
       .single();
       
     if (error) throw error;
-    return { success: true, data: data as User };
+    if (data) {
+      return { success: true, data: data as Profile };
+    }
+
+    // If profile doesn't exist, create it
+    const { data: newProfile, error: createError } = await supabase
+      .from('profiles')
+      .insert([{ id: userId }])
+      .select()
+      .single();
+
+    if (createError) throw createError;
+    return { success: true, data: newProfile as Profile };
   } catch (error: any) {
     console.error('Error getting user profile:', error.message);
     return { success: false, error: error.message, data: null };
   }
 };
 
-export const updateUserProfile = async (userId: string, updates: Partial<User>) => {
+export const updateUserProfile = async (userId: string, updates: Partial<Profile>) => {
   try {
-    const { data, error } = await supabase
+    console.log('Updating profile for user:', userId);
+    console.log('Updates:', updates);
+
+    // First check if profile exists
+    const { data: existingProfile, error: checkError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (checkError) {
+      console.error('Error checking profile:', checkError);
+      throw checkError;
+    }
+
+    if (!existingProfile) {
+      console.log('Profile does not exist, creating new profile');
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert([{ id: userId, ...updates }])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating profile:', createError);
+        throw createError;
+      }
+
+      return { success: true, data: newProfile };
+    }
+
+    console.log('Existing profile found, updating...');
+    const { data: updatedProfile, error: updateError } = await supabase
       .from('profiles')
       .update(updates)
-      .eq('id', userId);
-      
-    if (error) throw error;
-    return { success: true, data };
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error updating profile:', updateError);
+      throw updateError;
+    }
+
+    // Fetch the latest profile data to ensure we have the most up-to-date version
+    const { data: refreshedProfile, error: refreshError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (refreshError) {
+      console.error('Error refreshing profile:', refreshError);
+      throw refreshError;
+    }
+
+    console.log('Profile successfully updated and refreshed:', refreshedProfile);
+    return { success: true, data: refreshedProfile };
   } catch (error: any) {
-    console.error('Error updating user profile:', error.message);
+    console.error('Error in updateUserProfile:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    });
     return { success: false, error: error.message };
   }
 };

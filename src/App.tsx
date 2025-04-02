@@ -13,6 +13,7 @@ import Health from "./pages/Health";
 import Profile from "./pages/Profile";
 import DeviceSync from "./pages/DeviceSync";
 import NotFound from "./pages/NotFound";
+import { HomePage } from "./pages/home";
 
 const queryClient = new QueryClient();
 
@@ -25,8 +26,8 @@ const App = () => {
             <Toaster />
             <Sonner />
             <AnimatePresence mode="wait">
-              <Routes>
-                <Route path="/" element={<Navigate to="/auth" replace />} />
+            <Routes>
+                <Route path="/" element={<HomePage />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/workouts" element={<Workouts />} />

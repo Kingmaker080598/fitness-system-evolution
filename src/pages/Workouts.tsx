@@ -12,21 +12,21 @@ const workouts = {
   monday: [
     {
       title: 'Push-ups',
-      imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://static.strengthlevel.com/images/illustrations/push-ups-1000x1000.jpg',
       sets: 3,
       reps: 12,
       description: 'Keep your body straight and lower until your chest nearly touches the ground.'
     },
     {
       title: 'Tricep Dips',
-      imageUrl: 'https://images.unsplash.com/photo-1530021356476-0a6375ffe73b?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/03/bench-dips.gif',
       sets: 3,
       reps: 15,
       description: 'Use a chair or bench, lower your body until arms are at 90 degrees.'
     },
     {
       title: 'Incline Push-ups',
-      imageUrl: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/04/incline-push-up.gif',
       sets: 3,
       reps: 10,
       description: 'Place hands on elevated surface. Easier variation of standard push-ups.'
@@ -35,14 +35,14 @@ const workouts = {
   tuesday: [
     {
       title: 'Bodyweight Rows',
-      imageUrl: 'https://images.unsplash.com/photo-1517344884509-a0c97ec11bcc?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://static.strengthlevel.com/images/illustrations/inverted-rows-1000x1000.jpg',
       sets: 3,
       reps: 12,
       description: 'Use a table or horizontal bar, pull your chest towards the bar.'
     },
     {
       title: 'Bicep Isometric Holds',
-      imageUrl: 'https://images.unsplash.com/photo-1581009137042-c552e485697a?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/bicep-isometric-hold.jpg',
       sets: 3,
       reps: 30,
       description: 'Hold position with arms at 90 degrees for time indicated.'
@@ -51,14 +51,14 @@ const workouts = {
   wednesday: [
     {
       title: 'Bodyweight Squats',
-      imageUrl: 'https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2021/07/bodyweight-squat.gif',
       sets: 4,
       reps: 15,
       description: 'Stand with feet shoulder-width apart, lower until thighs are parallel to ground.'
     },
     {
       title: 'Lunges',
-      imageUrl: 'https://images.unsplash.com/photo-1540338935410-857cc5cfa5b3?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/04/bodyweight-lunge.gif',
       sets: 3,
       reps: 10,
       description: 'Step forward and lower your body until both knees form 90-degree angles.'
@@ -67,14 +67,14 @@ const workouts = {
   thursday: [
     {
       title: 'Pike Push-ups',
-      imageUrl: 'https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/04/pike-push-up.gif',
       sets: 3,
       reps: 10,
       description: 'Form an inverted V, lower head toward the ground to target shoulders.'
     },
     {
       title: 'Jumping Jacks',
-      imageUrl: 'https://images.unsplash.com/photo-1582656447063-637a9e5d3a91?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2021/08/jumping-jack.gif',
       sets: 3,
       reps: 30,
       description: 'Jump while spreading arms and legs, then return to standing position.'
@@ -83,14 +83,14 @@ const workouts = {
   friday: [
     {
       title: 'Burpees',
-      imageUrl: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2021/08/burpee.gif',
       sets: 3,
       reps: 10,
       description: 'Combination of squat, push-up, and jump. Full body exercise.'
     },
     {
       title: 'Mountain Climbers',
-      imageUrl: 'https://images.unsplash.com/photo-1520208422220-d12a3c588e6c?q=80&w=1000&auto=format&fit=crop',
+      imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2021/08/mountain-climbers.gif',
       sets: 3,
       reps: 20,
       description: 'From plank position, alternate bringing knees to chest quickly.'

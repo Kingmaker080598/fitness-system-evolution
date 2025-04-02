@@ -96,9 +96,141 @@ npx cap sync
 
 ## Deploying to App Stores
 
-### iOS App Store
+### iOS App Store Deployment
 
-1. In Xcode, select "Generic iOS Device" as the build target
+1. Prepare Your App
+   - Update version numbers in `package.json` and `ios/App/App.xcodeproj/project.pbxproj`
+   - Ensure all app icons and splash screens are properly configured
+   - Test the production build thoroughly
+
+2. Configure Xcode Project
+   - Open Xcode project: `npx cap open ios`
+   - Set Bundle Identifier (e.g., com.yourcompany.fitnessapp)
+   - Configure signing certificates and provisioning profiles
+   - Set up App Store Connect record for your app
+
+3. Build and Archive
+   - Select "Generic iOS Device" as the build target
+   - Choose Product > Archive from the menu
+   - In the Archives window, click "Distribute App"
+   - Select "App Store Connect" and follow the upload steps
+
+4. Submit for Review
+   - Log in to App Store Connect (https://appstoreconnect.apple.com)
+   - Complete app information, screenshots, and metadata
+   - Submit for review through the platform
+
+### Android Play Store Deployment
+
+1. Prepare Your App
+   - Update version codes in `android/app/build.gradle`
+   - Ensure all app icons and splash screens are set
+   - Test the production build thoroughly
+
+2. Generate Release Bundle
+   ```bash
+   # Build the web app
+   npm run build
+   
+   # Sync with Capacitor
+   npx cap sync android
+   
+   # Open Android Studio
+   npx cap open android
+   ```
+
+3. In Android Studio
+   - Select Build > Generate Signed Bundle/APK
+   - Choose Android App Bundle
+   - Create or select a keystore file
+   - Fill in the key store password, key alias, and key password
+   - Select release build variant
+   - Choose destination folder
+
+4. Submit to Play Store
+   - Log in to Google Play Console (https://play.google.com/console)
+   - Create a new app or select existing app
+   - Upload the .aab file in the Production track
+   - Fill in store listing, content rating, and pricing
+   - Submit for review
+
+## Environment Setup
+
+### Development Environment
+
+1. Install Required Software:
+   ```bash
+   # Install Node.js (v16+)
+   brew install node
+
+   # Install Ionic CLI
+   npm install -g @ionic/cli
+
+   # Install Capacitor CLI
+   npm install -g @capacitor/cli
+   ```
+
+2. iOS Development Setup:
+   - Install Xcode from the Mac App Store
+   - Install Xcode Command Line Tools:
+     ```bash
+     xcode-select --install
+     ```
+   - Install CocoaPods:
+     ```bash
+     sudo gem install cocoapods
+     ```
+
+3. Android Development Setup:
+   - Download and install Android Studio
+   - Install Android SDK through Android Studio
+   - Set ANDROID_HOME environment variable
+   - Add platform-tools to PATH
+
+### Production Environment
+
+1. Configure Environment Variables:
+   ```bash
+   # Create .env.production
+   cp .env.example .env.production
+   
+   # Edit the file with production values
+   nano .env.production
+   ```
+
+2. SSL Certificate Setup:
+   - Obtain SSL certificate for production domain
+   - Configure web server with SSL
+
+3. Database Setup:
+   - Configure production database settings
+   - Run database migrations
+
+## Troubleshooting
+
+### Common Issues
+
+1. Build Errors:
+   - Clear npm cache: `npm cache clean --force`
+   - Delete node_modules: `rm -rf node_modules`
+   - Reinstall dependencies: `npm install`
+
+2. iOS Specific:
+   - Reset iOS simulator
+   - Clean Xcode build: Xcode > Product > Clean Build Folder
+   - Update CocoaPods: `pod update`
+
+3. Android Specific:
+   - Clear Android Studio cache
+   - Invalidate caches: File > Invalidate Caches
+   - Update Gradle: File > Sync Project with Gradle Files
+
+### Support
+
+For additional support:
+- Check the [Issues](https://github.com/yourusername/fitness-system-evolution/issues) section
+- Contact the development team
+- Review the documentation in the `docs` folder
 2. Go to Product > Archive
 3. Once archiving is complete, click "Distribute App"
 4. Follow the prompts to upload to the App Store
