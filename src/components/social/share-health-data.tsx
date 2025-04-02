@@ -19,7 +19,6 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import { ShareCodeGenerator } from './share-code-generator';
-import { EmailShare } from './email-share';
 import { WhatsAppShare } from './whatsapp-share';
 
 export const ShareHealthData = () => {
@@ -47,21 +46,13 @@ export const ShareHealthData = () => {
         
         {user && (
           <Tabs defaultValue="code" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4">
+            <TabsList className="grid grid-cols-2 mb-4">
               <TabsTrigger value="code">Share Code</TabsTrigger>
-              <TabsTrigger value="email">Email</TabsTrigger>
               <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
             </TabsList>
             
             <TabsContent value="code">
               <ShareCodeGenerator userId={user.id} />
-            </TabsContent>
-            
-            <TabsContent value="email">
-              <EmailShare 
-                userId={user.id} 
-                onSuccess={() => setOpen(false)}
-              />
             </TabsContent>
             
             <TabsContent value="whatsapp">

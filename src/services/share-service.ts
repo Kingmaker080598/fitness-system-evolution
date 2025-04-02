@@ -1,10 +1,10 @@
+
 import { supabase } from '@/lib/supabase';
 
 interface SharedHealthData {
   id?: string;
   sender_id: string;
   sender_name?: string;
-  recipient_email?: string;
   share_code: string;
   expires_at: string;
   created_at?: string;
@@ -37,38 +37,6 @@ export const createShareableLink = async (userId: string) => {
     return { success: true, data: data as SharedHealthData };
   } catch (error: any) {
     console.error('Error creating shareable link:', error.message);
-    return { success: false, error: error.message };
-  }
-};
-
-export const shareViaEmail = async (userId: string, recipientEmail: string) => {
-  try {
-    // First create a share code
-    const { success, data: shareData, error } = await createShareableLink(userId);
-    if (!success || !shareData) throw new Error(error || 'Failed to create share');
-
-    // Update the share with recipient email
-    const { error: updateError } = await supabase
-      .from('shared_health_data')
-      .update({ recipient_email: recipientEmail })
-      .eq('id', shareData.id);
-
-    if (updateError) throw updateError;
-
-    // Send email via Edge Function
-    const { error: emailError } = await supabase.functions.invoke('send-share-email', {
-      body: {
-        recipientEmail,
-        shareCode: shareData.share_code,
-        expiresAt: shareData.expires_at,
-      },
-    });
-
-    if (emailError) throw emailError;
-
-    return { success: true, data: shareData };
-  } catch (error: any) {
-    console.error('Error sharing via email:', error);
     return { success: false, error: error.message };
   }
 };
