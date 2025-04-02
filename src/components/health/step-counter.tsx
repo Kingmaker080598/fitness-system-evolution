@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Motion } from '@capacitor/motion';
 import { Button } from '@/components/ui/button';
@@ -16,13 +15,11 @@ export const StepCounter: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Load saved step count from localStorage on component mount
   useEffect(() => {
     const savedSteps = localStorage.getItem('today-steps');
     const lastSaveDate = localStorage.getItem('steps-last-save-date');
     const today = new Date().toDateString();
     
-    // Reset steps if it's a new day
     if (lastSaveDate !== today) {
       localStorage.setItem('today-steps', '0');
       localStorage.setItem('steps-last-save-date', today);
@@ -32,23 +29,24 @@ export const StepCounter: React.FC = () => {
     }
   }, []);
   
-  // Update local storage when steps change
   useEffect(() => {
     localStorage.setItem('today-steps', steps.toString());
   }, [steps]);
   
-  // Check if motion is available when component mounts
   useEffect(() => {
     const checkDeviceMotion = async () => {
       try {
-        // Check if the device supports motion - using the correct API method
-        const isAvailable = await Motion.checkPermissions().then(() => true).catch(() => false);
-        setIsSupported(isAvailable);
+        const isAvailable = await Motion.addListener('accel', () => {
+          Motion.removeAllListeners();
+          return true;
+        }).catch(() => false);
+        
+        setIsSupported(!!isAvailable);
         
         if (isAvailable) {
-          // Check if we have permission - fixed to use the correct API method
           try {
-            await Motion.checkPermissions();
+            await Motion.addListener('accel', () => {});
+            await Motion.removeAllListeners();
             setIsPermissionGranted(true);
           } catch (error) {
             setIsPermissionGranted(false);
@@ -74,13 +72,10 @@ export const StepCounter: React.FC = () => {
     checkDeviceMotion();
   }, [toast]);
   
-  // Start/stop step tracking
   const toggleTracking = async () => {
     if (isTracking) {
-      // Stop tracking
       await Motion.removeAllListeners();
       setIsTracking(false);
-      // Save steps to health metrics if user is logged in
       if (user && steps > 0) {
         saveHealthMetric(user.id, 'steps', steps.toString(), 'steps')
           .then(response => {
@@ -95,11 +90,10 @@ export const StepCounter: React.FC = () => {
       }
     } else {
       try {
-        // Request permission again if needed
         if (!isPermissionGranted) {
           try {
-            // Use the correct API method for permissions
-            await Motion.checkPermissions();
+            await Motion.addListener('accel', () => {});
+            await Motion.removeAllListeners();
             setIsPermissionGranted(true);
           } catch (error) {
             console.error('Permission not granted:', error);
@@ -112,13 +106,10 @@ export const StepCounter: React.FC = () => {
           }
         }
         
-        // Start tracking
         await Motion.addListener('accel', event => {
-          // Simple step detection algorithm based on acceleration
           const { x, y, z } = event.acceleration;
           const magnitude = Math.sqrt(x * x + y * y + z * z);
           
-          // Threshold for step detection (can be adjusted)
           if (magnitude > 10) {
             setSteps(prevSteps => prevSteps + 1);
           }
