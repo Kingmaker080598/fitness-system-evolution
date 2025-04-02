@@ -1,7 +1,8 @@
 
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
 
 // Register service worker for offline support
 const registerServiceWorker = async () => {
@@ -39,7 +40,11 @@ const registerServiceWorker = async () => {
 // Initialize the app
 const initialize = () => {
   const root = createRoot(document.getElementById("root")!);
-  root.render(<App />);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
   registerServiceWorker();
 };
 

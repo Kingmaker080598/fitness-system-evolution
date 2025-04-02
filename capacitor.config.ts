@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
   plugins: {
     Motion: {
       ios: {
-        motion: ["accelerometer", "gyroscope", "pedometer"]
+        motion: ["accelerometer", "gyroscope"]
       },
       android: {
         motion: ["accelerometer", "gyroscope"]

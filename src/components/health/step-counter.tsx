@@ -41,16 +41,17 @@ export const StepCounter: React.FC = () => {
   useEffect(() => {
     const checkDeviceMotion = async () => {
       try {
-        // Check if the device supports motion
-        const { isAvailable } = await Motion.isAvailable();
+        // Check if the device supports motion - using the correct API method
+        const isAvailable = await Motion.checkPermissions().then(() => true).catch(() => false);
         setIsSupported(isAvailable);
         
         if (isAvailable) {
-          // Check if we have permission
-          const { granted } = await Motion.requestPermissions();
-          setIsPermissionGranted(granted);
-          
-          if (!granted) {
+          // Check if we have permission - fixed to use the correct API method
+          try {
+            await Motion.checkPermissions();
+            setIsPermissionGranted(true);
+          } catch (error) {
+            setIsPermissionGranted(false);
             toast({
               title: "Permission Required",
               description: "Step counting requires motion sensor permission",
@@ -96,9 +97,12 @@ export const StepCounter: React.FC = () => {
       try {
         // Request permission again if needed
         if (!isPermissionGranted) {
-          const { granted } = await Motion.requestPermissions();
-          setIsPermissionGranted(granted);
-          if (!granted) {
+          try {
+            // Use the correct API method for permissions
+            await Motion.checkPermissions();
+            setIsPermissionGranted(true);
+          } catch (error) {
+            console.error('Permission not granted:', error);
             toast({
               title: "Permission Denied",
               description: "Cannot count steps without motion permission",
