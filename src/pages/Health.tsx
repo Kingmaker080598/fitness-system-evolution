@@ -7,6 +7,7 @@ import { HealthChart } from '@/components/health/health-chart';
 import { ShareHealthData } from '@/components/social/share-health-data';
 import { ImportHealthData } from '@/components/social/import-health-data';
 import { AddHealthMetricCards } from '@/components/health/add-health-metric-cards';
+import { OfflineIndicator } from '@/components/health/offline-indicator';
 import { Button } from '@/components/ui/button';
 import { 
   Plus, 
@@ -19,19 +20,25 @@ import {
   Bluetooth 
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getHealthMetrics, getHealthMetricHistory } from '@/services/health-service';
-import { HealthMetric } from '@/lib/supabase';
+import { getHealthMetricHistory } from '@/services/health-service';
+import { getHealthMetricsWithOfflineSupport, useSyncOnReconnect } from '@/services/health-service-wrapper';
+import { HealthMetric } from '@/types/health';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Health = () => {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [isAddMetricOpen, setIsAddMetricOpen] = useState(false);
   const [healthMetrics, setHealthMetrics] = useState<{[key: string]: HealthMetric}>({});
   const [weightData, setWeightData] = useState<{date: string; value: number}[]>([]);
   const [bpData, setBpData] = useState<{date: string; value: number}[]>([]);
   const [bloodSugarData, setBloodSugarData] = useState<{date: string; value: number}[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  
+  // Use the sync hook to handle reconnection
+  const { isSyncing } = useSyncOnReconnect(user?.id || '');
 
   // Fetch health metrics on component mount
   useEffect(() => {
@@ -45,8 +52,8 @@ const Health = () => {
     
     setIsDataLoading(true);
     try {
-      // Get the latest health metrics for each type
-      const response = await getHealthMetrics(user.id);
+      // Get the latest health metrics for each type with offline support
+      const response = await getHealthMetricsWithOfflineSupport(user.id);
       
       if (response.success) {
         const latestMetrics: {[key: string]: HealthMetric} = {};
@@ -126,15 +133,18 @@ const Health = () => {
             <h1 className="text-2xl font-bold text-foreground">Health</h1>
             <p className="text-muted-foreground text-sm">Track your health metrics</p>
           </div>
-          <Button 
-            className="bg-solo-purple hover:bg-solo-purple/80"
-            onClick={() => setIsAddMetricOpen(true)}
-          >
-            <Plus size={16} className="mr-1" /> Add Entry
-          </Button>
+          <div className="flex items-center gap-2">
+            <OfflineIndicator isSyncing={isSyncing} />
+            <Button 
+              className="bg-solo-purple hover:bg-solo-purple/80"
+              onClick={() => setIsAddMetricOpen(true)}
+            >
+              <Plus size={16} className="mr-1" /> Add Entry
+            </Button>
+          </div>
         </div>
         
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           <ShareHealthData />
           <ImportHealthData />
         </div>
@@ -148,7 +158,8 @@ const Health = () => {
           </Button>
         </Link>
         
-        <div className="grid grid-cols-2 gap-3">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
+          {/* Health metric cards with responsive layout */}
           <HealthMetricCard
             title="Weight"
             value={healthMetrics.weight ? parseFloat(healthMetrics.weight.value) : 0}
@@ -156,7 +167,7 @@ const Health = () => {
             date={healthMetrics.weight ? new Date(healthMetrics.weight.date).toLocaleDateString() : ''}
             icon={<Scale size={20} />}
             change={healthMetrics.weight && weightData.length > 1 ? {
-              value: Math.abs(parseFloat(healthMetrics.weight.value) - weightData[weightData.length - 2]?.value || 0),
+              value: Math.abs(parseFloat(healthMetrics.weight.value) - (weightData[weightData.length - 2]?.value || 0)),
               positive: parseFloat(healthMetrics.weight.value) < (weightData[weightData.length - 2]?.value || 0)
             } : undefined}
           />

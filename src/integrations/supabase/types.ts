@@ -113,12 +113,47 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_health_data: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          recipient_email: string | null
+          sender_id: string
+          sender_name: string | null
+          share_code: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          recipient_email?: string | null
+          sender_id: string
+          sender_name?: string | null
+          share_code: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          recipient_email?: string | null
+          sender_id?: string
+          sender_name?: string | null
+          share_code?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      execute_sql: {
+        Args: {
+          sql: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
