@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/mobile-layout';
@@ -8,6 +7,7 @@ import { ShareHealthData } from '@/components/social/share-health-data';
 import { ImportHealthData } from '@/components/social/import-health-data';
 import { AddHealthMetricCards } from '@/components/health/add-health-metric-cards';
 import { OfflineIndicator } from '@/components/health/offline-indicator';
+import { StepCounter } from '@/components/health/step-counter';
 import { Button } from '@/components/ui/button';
 import { 
   Plus, 
@@ -17,7 +17,8 @@ import {
   Activity, 
   TrendingUp, 
   Droplets, 
-  Bluetooth 
+  Bluetooth,
+  Footprints 
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getHealthMetricHistory } from '@/services/health-service';
@@ -37,10 +38,8 @@ const Health = () => {
   const [bloodSugarData, setBloodSugarData] = useState<{date: string; value: number}[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   
-  // Use the sync hook to handle reconnection
   const { isSyncing } = useSyncOnReconnect(user?.id || '');
 
-  // Fetch health metrics on component mount
   useEffect(() => {
     if (user) {
       fetchHealthMetrics();
@@ -52,13 +51,11 @@ const Health = () => {
     
     setIsDataLoading(true);
     try {
-      // Get the latest health metrics for each type with offline support
       const response = await getHealthMetricsWithOfflineSupport(user.id);
       
       if (response.success) {
         const latestMetrics: {[key: string]: HealthMetric} = {};
         
-        // Group by metric type and get the latest one for each type
         response.data.forEach(metric => {
           if (!latestMetrics[metric.metric_type] || 
               new Date(metric.date) > new Date(latestMetrics[metric.metric_type].date)) {
@@ -68,7 +65,6 @@ const Health = () => {
         
         setHealthMetrics(latestMetrics);
         
-        // Fetch history for charts
         fetchMetricHistory('weight');
         fetchMetricHistory('blood_pressure');
         fetchMetricHistory('blood_sugar');
@@ -120,7 +116,6 @@ const Health = () => {
     fetchHealthMetrics();
   };
 
-  // Check if user is logged in
   if (!isLoading && !user) {
     return <Navigate to="/auth" replace />;
   }
@@ -144,6 +139,8 @@ const Health = () => {
           </div>
         </div>
         
+        <StepCounter />
+        
         <div className="flex flex-wrap gap-2 mb-4">
           <ShareHealthData />
           <ImportHealthData />
@@ -159,7 +156,6 @@ const Health = () => {
         </Link>
         
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
-          {/* Health metric cards with responsive layout */}
           <HealthMetricCard
             title="Weight"
             value={healthMetrics.weight ? parseFloat(healthMetrics.weight.value) : 0}
@@ -170,6 +166,14 @@ const Health = () => {
               value: Math.abs(parseFloat(healthMetrics.weight.value) - (weightData[weightData.length - 2]?.value || 0)),
               positive: parseFloat(healthMetrics.weight.value) < (weightData[weightData.length - 2]?.value || 0)
             } : undefined}
+          />
+          
+          <HealthMetricCard
+            title="Steps"
+            value={healthMetrics.steps ? parseFloat(healthMetrics.steps.value) : 0}
+            unit="steps"
+            date={healthMetrics.steps ? new Date(healthMetrics.steps.date).toLocaleDateString() : ''}
+            icon={<Footprints size={20} />}
           />
           
           <HealthMetricCard

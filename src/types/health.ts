@@ -1,7 +1,8 @@
+
 export interface HealthMetric {
   id: string;
   user_id: string;
-  metric_type: 'weight' | 'steps' | 'heart_rate' | 'sleep_hours' | 'water_ml';
+  metric_type: 'weight' | 'steps' | 'heart_rate' | 'sleep_hours' | 'water_ml' | 'height' | 'blood_pressure' | 'blood_sugar';
   value: string;
   unit: string;
   date: string;
@@ -11,7 +12,6 @@ export interface HealthMetric {
 export interface SharedHealthData {
   id: string;
   sender_id: string;
-  recipient_email?: string;
   share_code: string;
   expires_at: string;
   created_at: string;
@@ -27,4 +27,7 @@ export const metricLabels: Record<MetricType, string> = {
   heart_rate: 'Heart Rate (bpm)',
   sleep_hours: 'Sleep (hours)',
   water_ml: 'Water (ml)',
+  height: 'Height (cm)',
+  blood_pressure: 'Blood Pressure (mmHg)',
+  blood_sugar: 'Blood Sugar (mg/dL)',
 };

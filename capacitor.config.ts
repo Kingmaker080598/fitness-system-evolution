@@ -14,6 +14,16 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: "#000000"
+  },
+  plugins: {
+    Motion: {
+      ios: {
+        motion: ["accelerometer", "gyroscope", "pedometer"]
+      },
+      android: {
+        motion: ["accelerometer", "gyroscope"]
+      }
+    }
   }
 };
 
