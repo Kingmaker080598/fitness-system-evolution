@@ -74,3 +74,44 @@ export const addOnlineListener = (callback: () => void) => {
   window.addEventListener('online', callback);
   return () => window.removeEventListener('online', callback); // Return cleanup function
 };
+
+// Get offline data of a specific type
+export const getOfflineData = (key: string): any[] => {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error(`Error retrieving offline data for ${key}:`, error);
+    return [];
+  }
+};
+
+// Store offline data of a specific type
+export const storeOfflineData = (key: string, data: any[]): boolean => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    return true;
+  } catch (error) {
+    console.error(`Error storing offline data for ${key}:`, error);
+    return false;
+  }
+};
+
+// Clear synced items from offline storage
+export const clearSyncedItems = async (key: string): Promise<boolean> => {
+  try {
+    const items = await getOfflineData(key);
+    const unsynced = items.filter(item => !item.is_synced);
+    
+    if (unsynced.length < items.length) {
+      // Only update storage if we're actually removing items
+      await storeOfflineData(key, unsynced);
+      console.log(`Cleared ${items.length - unsynced.length} synced items from ${key}`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error clearing synced items for ${key}:`, error);
+    return false;
+  }
+};

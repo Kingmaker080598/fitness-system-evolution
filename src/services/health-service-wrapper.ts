@@ -1,7 +1,11 @@
 // Update the health-service-wrapper.ts file to fix the addHealthMetric references
 import { getHealthMetrics, saveHealthMetric } from './health-service';
 import { HealthMetric } from '@/types/health';
-import { getOfflineData, storeOfflineData, clearSyncedItems } from './offline-storage';
+import { 
+  getOfflineData, 
+  storeOfflineData, 
+  clearSyncedItems 
+} from './offline-storage';
 
 // Rest of the file remains the same, but we need to replace addHealthMetric with saveHealthMetric
 // in the syncOfflineHealthMetrics function and saveOfflineHealthMetric function
