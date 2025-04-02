@@ -49,7 +49,7 @@ export const addHealthMetricWithOfflineSupport = async (
   try {
     // If online, try to save directly
     if (offlineStorage.isOnline()) {
-      const result = await healthService.addHealthMetric(userId, metricType, value, unit, date);
+      const result = await healthService.saveHealthMetric(userId, metricType, value, unit);
       
       if (result.success) {
         // Update local cache with the new data
@@ -106,12 +106,11 @@ export const useSyncOnReconnect = (userId: string) => {
           if (user_id !== userId) continue;
           
           // Try to upload
-          const result = await healthService.addHealthMetric(
+          const result = await healthService.saveHealthMetric(
             user_id, 
             metric_type as MetricType, 
             value, 
-            unit, 
-            date
+            unit
           );
           
           if (result.success) {

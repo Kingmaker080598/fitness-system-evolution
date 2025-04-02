@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { WhatsApp } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { createShareableLink } from '@/services/share-service';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -79,12 +79,12 @@ export const WhatsAppShare: React.FC<WhatsAppShareProps> = ({ userId }) => {
     >
       {isLoading ? (
         <>
-          <WhatsApp className="mr-2 h-4 w-4 animate-spin" />
+          <MessageCircle className="mr-2 h-4 w-4 animate-spin" />
           Preparing Share...
         </>
       ) : (
         <>
-          <WhatsApp className="mr-2 h-4 w-4" />
+          <MessageCircle className="mr-2 h-4 w-4" />
           Share via WhatsApp
         </>
       )}

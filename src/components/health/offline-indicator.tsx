@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { WiFiOff, WifiIcon } from 'lucide-react';
+import { WifiOff, WifiIcon } from 'lucide-react';
 import { isOnline } from '@/services/offline-storage';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -45,7 +45,7 @@ export const OfflineIndicator: React.FC<{ isSyncing?: boolean }> = ({ isSyncing 
         </>
       ) : (
         <>
-          <WiFiOff size={12} />
+          <WifiOff size={12} />
           <span>Offline</span>
         </>
       )}
